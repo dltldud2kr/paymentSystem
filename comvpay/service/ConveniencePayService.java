@@ -3,24 +3,33 @@ package com.zerobase.comvpay.service;
 import com.zerobase.comvpay.dto.*;
 import com.zerobase.comvpay.type.*;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 // 편결이 서비스
 public class ConveniencePayService {
     // 결제
-    private final MoneyAdapter moneyAdapter = new MoneyAdapter();   // 변동 X   final 사용 , 생성자 호출필요 x
-    private final CardAdapter cardAdapter = new CardAdapter();
-//    private  final DiscountInterface discountInterface = new DiscountByPayMethod();
-    private  final DiscountInterface discountInterface = new DiscountByConvenience();     // 인터페이스 다형성 사용
-    //인터페이스 다형성 쓰는 이유 ? WorkSpace의 입장에서는 그 중 원하는 것만 뽑아 쓸 수 있다는 것이 장점  즉, 인터페이스 다형성의 장점은 원하는 기능에 집중할 수 있다.
 
+    //key , value 를 받는 map 타입의 paymentInterfaceMap 생성
+    private final Map<PayMethodType, PaymentInterface> paymentInterfaceMap =
+            new HashMap<>();
+    private final DiscountInterface discountInterface; // 껍데기만 있는 인터페이스
+
+    public ConveniencePayService(Set<PaymentInterface> paymentInterfaceSet,
+                                 DiscountInterface discountInterface) {
+        paymentInterfaceSet.forEach(
+            paymentInterface -> paymentInterfaceMap.put(
+                    paymentInterface.getPayMethodType(),
+                    paymentInterface
+            )
+        );
+        this.discountInterface = discountInterface;
+    }
 
     public PayResponse pay(PayRequest payRequest) {
-        PaymentInterface paymentInterface;
+        PaymentInterface paymentInterface = paymentInterfaceMap.get(payRequest.getPayMethodType());
 
-        if(payRequest.getPayMethodType() == PayMethodType.CARD){
-            paymentInterface = cardAdapter;
-        }else{
-            paymentInterface = moneyAdapter;
-        }
 
         Integer discountedAmount = discountInterface.getDiscountedAmount(payRequest);   // 할인정책을 적용한 금액을 산출하기위해
         PaymentResult payment = paymentInterface.payment(discountedAmount);
@@ -38,13 +47,7 @@ public class ConveniencePayService {
 
     //결제 취소
     public PayCancelResponse payCancel(PayCancelRequest payCancelRequest) {
-        PaymentInterface paymentInterface;
-
-        if(payCancelRequest.getPayMethodType() == PayMethodType.CARD){
-            paymentInterface = cardAdapter;
-        }else{
-            paymentInterface = moneyAdapter;
-        }
+        PaymentInterface paymentInterface = paymentInterfaceMap.get(payCancelRequest.getPayMethodType());
 
         CancelPaymentResult cancelPaymentResult = paymentInterface.cancelPayment(payCancelRequest.getPayCancelAmount());
 
