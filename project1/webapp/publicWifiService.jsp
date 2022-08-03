@@ -1,8 +1,12 @@
 <%@page import="db.WifiInfo"%>
 <%@page import="java.util.List"%>
 <%@page import="db.WifiService"%>
+<%@page import="db.TbPublicWifiInfo"%>
+
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+
+    
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,6 +17,10 @@
 		th, td {
 			border:solid 1px #000;
 		}	
+		
+		table {
+			border-collapse: collapse;
+		}
 		
 	</style>
 </head>
@@ -25,19 +33,12 @@
 	<a href>Open Api 와이파이 정보 가져오기</a>
 
 </p>
-<form action="viewWifiInfo.jsp"method="post">
-LAT: <input type="text" name="LAT"> , LNT: <input type= "text" name="LNT"> 
+<form action="viewWifiInfo.jsp"method="get">
+LAT: <input type="text" name="LAT"> , LNT: <input type= "text" name="LNT"> 	
 <input type="submit" value="내 위치 가져오기"> 
 <input type="button" value="근처 WIFI 정보 보기">
 </form>
 
-
-  
-	<%
-		WifiService wifiService = new WifiService();
-		List<WifiInfo> wifiList = wifiService.list();
-	%>
-	
 	<table>
 		<thead>
 			<tr>
@@ -62,32 +63,7 @@ LAT: <input type="text" name="LAT"> , LNT: <input type= "text" name="LNT">
 		</thead>
 		<tbody>
 			<tr>
-				<%
-					for(WifiInfo wifiInfo : wifiList){
-				%>
-						<tr>
-
-							<td> <%=wifiInfo.get거리()%> </td>
-							<td> <%=wifiInfo.get관리번호()%> </td>
-							<td> <%=wifiInfo.get자치구()%> </td>
-							<td> <%=wifiInfo.get와이파이명()%> </td>
-							<td> <%=wifiInfo.get도로명주소()%> </td>
-							<td> <%=wifiInfo.get상세주소()%> </td>
-							<td> <%=wifiInfo.get설치위치()%> </td>
-							<td> <%=wifiInfo.get설치유형()%> </td>
-							<td> <%=wifiInfo.get설치기관()%> </td>
-							<td> <%=wifiInfo.get서비스구분()%> </td>
-							<td> <%=wifiInfo.get망종류()%> </td>
-							<td> <%=wifiInfo.get설치년도()%> </td>
-							<td> <%=wifiInfo.get실내외구분()%> </td>
-							<td> <%=wifiInfo.getWifi접속환경()%> </td>
-							<td> <%=wifiInfo.getX좌표()%> </td>
-							<td> <%=wifiInfo.getY좌표()%> </td>
-							<td> <%=wifiInfo.get작업일자()%> </td>
-						</tr>
-				<% 
-					}
-				%>
+				<th>위치 정보를 입력한 후에 조회해 주세요.</th>
 				
 			</tr>
 		</tbody>

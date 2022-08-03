@@ -41,9 +41,46 @@ public class TbPublicWifiInfo{
 	private double lat;
 	
 	private double lnt;
+	/*
+	private int id;
+	
+	private double Xvalue;
+	
+	private double Yvalue;
 	
 	
 	
+	
+	public int getId() {
+		return id;
+	}
+
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+
+	public double getXvalue() {
+		return Xvalue;
+	}
+
+
+	public void setXvalue(double xvalue) {
+		Xvalue = xvalue;
+	}
+
+
+	public double getYvalue() {
+		return Yvalue;
+	}
+
+
+	public void setYvalue(double yvalue) {
+		Yvalue = yvalue;
+	}
+*/
+
 	public double getLat() {
 		return lat;
 	}

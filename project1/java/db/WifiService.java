@@ -7,10 +7,12 @@ import java.util.List;
 
 public class WifiService {
 	
-	TbPublicWifiInfo tw = new TbPublicWifiInfo();
-	WifiInfo wi = new WifiInfo ();
 
-	public List<WifiInfo> list(){
+	WifiInfo wf = new WifiInfo();
+	TbPublicWifiInfo tw = new TbPublicWifiInfo();
+	
+
+	public List<WifiInfo> list(double lat , double lnt){
 		
 		List<WifiInfo> wifiList = new ArrayList<>();
 		
@@ -25,29 +27,41 @@ public class WifiService {
         }
 
         Connection connection = null;
-        Statement statement = null;
+        PreparedStatement preparedStatement = null;
         ResultSet rs = null;
 
 
         try {
             connection = DriverManager.getConnection(url, dbUserId, dbPassword);
 
-            statement = connection.createStatement();
-
+           
 
             String sql = " select *, "
-            		+ "    (6371*acos(cos(radians(126.8512))*cos(radians(X좌표))*cos(radians(Y좌표) "
-            		+ "    -radians(37.541462))+sin(radians(126.8512))*sin(radians(X좌표)))) "
-            		+ "    as distance\r\n"
+            		+ "    (6371*acos(cos(radians(?))*cos(radians(X좌표))*cos(radians(Y좌표) "
+            		+ "    -radians(?))+sin(radians(?))*sin(radians(X좌표)))) "
+            		+ "    as distance "
             		+ " from TbPublicWifiInfo "
             		+ " order by distance "
-            		+ " limit 0,20; " ;
+            		+ " limit 0,20 ; " ;
+            
+           
 
-
-
-            rs = statement.executeQuery(sql);
-
+            preparedStatement = connection.prepareStatement(sql);
+            
+            preparedStatement.setDouble(1, lat);
+            preparedStatement.setDouble(2, lnt);
+            preparedStatement.setDouble(3, lat);
+            
+            rs = preparedStatement.executeQuery();
+            
+            
+ 
+  
             while(rs.next()){
+            	
+            	
+            	WifiInfo wi = new WifiInfo ();
+            	
             	wi.set거리(rs.getString("거리"));
             	wi.set관리번호(rs.getString("관리번호"));
             	wi.set자치구(rs.getString("자치구"));
@@ -70,8 +84,9 @@ public class WifiService {
             	wifiList.add(wi);		// 리스트에 추가 
             	
             	System.out.println("select 불러오기 완료!!");
-
-
+            	System.out.println("lat = " + lat);
+            	System.out.println("lnt = " + lnt);
+      
             }
 
 
@@ -88,8 +103,8 @@ public class WifiService {
             }
 
             try {
-                if (statement != null && !statement.isClosed()){
-                    statement.close();
+                if (preparedStatement != null && !preparedStatement.isClosed()){
+                	preparedStatement.close();
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -152,20 +167,21 @@ public class WifiService {
             preparedStatement.setDouble(15, tw.getY좌표());
             preparedStatement.setString(16, tw.get작업일자());
             
+          
+            
 
             int affected = preparedStatement.executeUpdate();
 
-            int cnt = 0;
-            if(affected > 0) {
-                System.out.println(" 저장 성공 ");
-                cnt++;
-              
+            
+            if(affected > 0) {   
+            	
+     
+            	
             } else{
                 System.out.println(" 저장 실패 ");
             }
-            tw.setCount(cnt);
             
-            System.out.println(cnt+"개의 데이터 저장!");
+            
 
 
         } catch (SQLException e) {
@@ -199,5 +215,237 @@ public class WifiService {
 
     }
     
+    public void historyInsert(TbPublicWifiInfo tw , double lat, double lnt ){
+        String url = "jdbc:mariadb://localhost:3306/project_db";
+        String dbUserId = "projectuser";
+        String dbPassword = "zerobase";
 
+        try {
+            Class.forName("org.mariadb.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet rs = null;
+
+
+        try {
+            connection = DriverManager.getConnection(url, dbUserId, dbPassword);
+
+            
+            
+            String sql = " insert into history (ID, Xvalue, Yvalue, inquiry_date) " +
+                    " values (?, ?, ?, now()); ";
+
+
+            preparedStatement = connection.prepareStatement(sql);
+
+            int id = 1;
+            preparedStatement.setInt(1, id); // id++을 넣어줘야함. 어딘가에
+            preparedStatement.setDouble(2, lat );
+            preparedStatement.setDouble(3, lnt);
+
+            int affected = preparedStatement.executeUpdate();
+   
+            if(affected > 0) {   
+            	System.out.println(" history 저장 완료");     	
+            } else{
+                System.out.println(" 저장 실패 ");
+            }
+            
+            
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+
+            try {
+                if (rs != null && !rs.isClosed()){
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (preparedStatement != null && !preparedStatement.isClosed()){
+                	preparedStatement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (connection != null && !connection.isClosed()){
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+    
+public List<WifiInfo> history(){
+		
+		List<WifiInfo> historyList = new ArrayList<>();
+		
+        String url = "jdbc:mariadb://localhost:3306/project_db";
+        String dbUserId = "projectuser";
+        String dbPassword = "zerobase";
+
+        try {
+            Class.forName("org.mariadb.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+
+
+        try {
+            connection = DriverManager.getConnection(url, dbUserId, dbPassword);
+
+            statement = connection.createStatement();
+
+            String sql = " select * "
+            		+ " from history "
+            		+ " ; " ;
+            
+         
+            rs = statement.executeQuery(sql);
+            
+            
+            while(rs.next()){
+            	
+            	
+            	WifiInfo wi = new WifiInfo ();
+            	
+            	wi.setId(rs.getInt("ID"));
+            	wi.setXvalue(rs.getDouble("Xvalue"));
+            	wi.setYvalue(rs.getDouble("Yvalue"));
+            	wi.setInquiry_date(rs.getString("inquiry_date"));
+            	
+            	
+            	
+            	historyList.add(wi);		// 리스트에 추가 
+            	
+            	System.out.println("select 불러오기 완료!!");
+            	
+      
+            }
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+
+            try {
+                if (rs != null && !rs.isClosed()){
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (statement != null && !statement.isClosed()){
+                	statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (connection != null && !connection.isClosed()){
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return historyList;
+
+    }
+/*
+    public void historyDel(){
+        String url = "jdbc:mariadb://localhost:3306/project_db";
+        String dbUserId = "projectuser";
+        String dbPassword = "zerobase";
+
+        try {
+            Class.forName("org.mariadb.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet rs = null;
+
+
+        try {
+            connection = DriverManager.getConnection(url, dbUserId, dbPassword);
+
+            
+            
+            String sql = " delete from history " +
+                    " values (?, ?, ?, now()); ";
+
+
+            preparedStatement = connection.prepareStatement(sql);
+
+            int id = 1;
+            preparedStatement.setInt(1, id); // id++을 넣어줘야함. 어딘가에
+            preparedStatement.setDouble(2, lat );
+            preparedStatement.setDouble(3, lnt);
+
+            int affected = preparedStatement.executeUpdate();
+   
+            if(affected > 0) {   
+            	System.out.println(" history 저장 완료");     	
+            } else{
+                System.out.println(" 저장 실패 ");
+            }
+            
+            
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+
+            try {
+                if (rs != null && !rs.isClosed()){
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (preparedStatement != null && !preparedStatement.isClosed()){
+                	preparedStatement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (connection != null && !connection.isClosed()){
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+*/
 }

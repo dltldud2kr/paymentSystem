@@ -20,10 +20,41 @@ public class WifiInfo {
 	private double Y좌표 ;
 	private String 작업일자 ;
 	private int count;
+	private int id;
+	private double Xvalue;
+	private double Yvalue;
+	private String inquiry_date;
 	
 	
 	
 	
+	public String getInquiry_date() {
+		return inquiry_date;
+	}
+	public void setInquiry_date(String inquiry_date) {
+		this.inquiry_date = inquiry_date;
+	}
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public double getXvalue() {
+		return Xvalue;
+	}
+	public void setXvalue(double xvalue) {
+		Xvalue = xvalue;
+	}
+	public double getYvalue() {
+		return Yvalue;
+	}
+
+
+	public void setYvalue(double yvalue) {
+		Yvalue = yvalue;
+	}
+
 	
 	public int getCount() {
 		return count;
